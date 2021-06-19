@@ -31,6 +31,8 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+// heroku addons:create cleardb:ignite --fork=mysql://root:@localhost:3306/database
+
 var tpl = template.Must(template.ParseGlob("templates/*.html"))
 var errtpl = template.Must(template.ParseGlob("templates/errpages/*.html"))
 var jwtKey = []byte("my_secret_key")
@@ -40,9 +42,18 @@ func dbConn() (db *sql.DB) {
 	// dbUser := os.Getenv("DB_USER")
 	// dbPass := os.Getenv("DB_PASSWORD")
 	// dbName := os.Getenv("DB_NAME")
+	// dbDriver := os.Getenv("DB_DRIVER")
+	// dbUser := os.Getenv("DB_USER")
+	// dbPass := os.Getenv("DB_PASSWORD")
+	// dbName := os.Getenv("DB_NAME")
 	// fmt.Println(dbDriver, dbUser, dbPass, dbName)
 	// db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(127.0.0.1:3306)/"+dbName+"?parseTime=true")
-	db, err := sql.Open("mysql", "root"+":"+""+"@tcp(127.0.0.1:3306)/"+"gowebauth"+"?parseTime=true")
+
+	dbDriver := "mysql"
+	dbUser := "b1de6611c01969"
+	dbPass := "91040c1a"
+	dbName := "heroku_e355c08c4ebe1a2"
+	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(us-cdbr-east-04.cleardb.com:3306)/"+dbName+"?parseTime=true")
 	if err != nil {
 		panic(err.Error())
 	}
