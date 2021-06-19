@@ -2,11 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"os"
 
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"text/template"
 	"time"
@@ -14,7 +14,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/context"
-	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -37,12 +36,13 @@ var errtpl = template.Must(template.ParseGlob("templates/errpages/*.html"))
 var jwtKey = []byte("my_secret_key")
 
 func dbConn() (db *sql.DB) {
-	dbDriver := os.Getenv("DB_DRIVER")
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-	fmt.Println(dbDriver, dbUser, dbPass, dbName)
-	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(127.0.0.1:3306)/"+dbName+"?parseTime=true")
+	// dbDriver := os.Getenv("DB_DRIVER")
+	// dbUser := os.Getenv("DB_USER")
+	// dbPass := os.Getenv("DB_PASSWORD")
+	// dbName := os.Getenv("DB_NAME")
+	// fmt.Println(dbDriver, dbUser, dbPass, dbName)
+	// db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(127.0.0.1:3306)/"+dbName+"?parseTime=true")
+	db, err := sql.Open("mysql", "root"+":"+""+"@tcp(127.0.0.1:3306)/"+"gowebauth"+"?parseTime=true")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -243,10 +243,10 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/login", loginHandler)
@@ -257,8 +257,13 @@ func main() {
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	log.Println("Server started on: http://localhost:8080")
-	err = http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux)) // context to prevent memory leak
+	PORT := os.Getenv("PORT")
+	println("port:", PORT)
+	if PORT == "" {
+		PORT = "8080"
+	}
+	log.Println("Server started on: http://localhost:" + PORT)
+	err := http.ListenAndServe(":"+PORT, context.ClearHandler(http.DefaultServeMux)) // context to prevent memory leak
 	if err != nil {
 		log.Fatal(err)
 	}
