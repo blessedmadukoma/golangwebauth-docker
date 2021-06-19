@@ -14,6 +14,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/context"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -38,22 +39,24 @@ var errtpl = template.Must(template.ParseGlob("templates/errpages/*.html"))
 var jwtKey = []byte("my_secret_key")
 
 func dbConn() (db *sql.DB) {
+	dbDriver := os.Getenv("DB_DRIVER")
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbHOST := os.Getenv("DB_HOST")
+	mysqlPORT := os.Getenv("MYSQL_PORT")
 	// dbDriver := os.Getenv("DB_DRIVER")
 	// dbUser := os.Getenv("DB_USER")
 	// dbPass := os.Getenv("DB_PASSWORD")
 	// dbName := os.Getenv("DB_NAME")
-	// dbDriver := os.Getenv("DB_DRIVER")
-	// dbUser := os.Getenv("DB_USER")
-	// dbPass := os.Getenv("DB_PASSWORD")
-	// dbName := os.Getenv("DB_NAME")
-	// fmt.Println(dbDriver, dbUser, dbPass, dbName)
+	// fmt.Println(dbDriver, dbUser, dbPass, dbName, dbHOST)
 	// db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(127.0.0.1:3306)/"+dbName+"?parseTime=true")
 
-	dbDriver := "mysql"
-	dbUser := "b1de6611c01969"
-	dbPass := "91040c1a"
-	dbName := "heroku_e355c08c4ebe1a2"
-	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(us-cdbr-east-04.cleardb.com:3306)/"+dbName+"?parseTime=true")
+	// dbDriver := "mysql"
+	// dbUser := "b1de6611c01969"
+	// dbPass := "91040c1a"
+	// dbName := "heroku_e355c08c4ebe1a2"
+	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp("+dbHOST+":"+mysqlPORT+")/"+dbName+"?parseTime=true")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -254,10 +257,10 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logouth", logoutHandler)
@@ -268,12 +271,12 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	PORT := os.Getenv("PORT")
-	println("port:", PORT)
+	// println("port:", PORT)
 	if PORT == "" {
 		PORT = "8080"
 	}
 	log.Println("Server started on: http://localhost:" + PORT)
-	err := http.ListenAndServe(":"+PORT, context.ClearHandler(http.DefaultServeMux)) // context to prevent memory leak
+	err = http.ListenAndServe(":"+PORT, context.ClearHandler(http.DefaultServeMux)) // context to prevent memory leak
 	if err != nil {
 		log.Fatal(err)
 	}
