@@ -247,7 +247,6 @@ func main() {
 	// if err != nil {
 	// 	log.Fatal("Error loading .env file")
 	// }
-
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logouth", logoutHandler)
