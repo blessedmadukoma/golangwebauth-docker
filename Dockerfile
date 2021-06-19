@@ -3,6 +3,7 @@ FROM golang:1.16.3-alpine AS builder
 RUN mkdir /build
 ADD go.mod go.sum main.go .env /build/
 WORKDIR /build
+RUN export GO111MODULE=on
 RUN go build
 
 FROM alpine
